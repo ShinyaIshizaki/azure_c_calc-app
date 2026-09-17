@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C言語CGI Webアプリ - Sprint 2</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 { font-size: 1.4rem; color: #0066cc; margin-top: 0; }
+        p { font-size: 0.95rem; color: #666; }
+        label { display: block; margin-top: 14px; font-weight: bold; font-size: 0.9rem; }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background-color: #0052a3; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>C言語CGI フォームテスト (GET)</h1>
+        <p>2つの数値を入力してC言語プログラムへ送信します。</p>
+        
+        <!-- actionに送信先のCGIパス、methodにGETを指定 -->
+        <form action="/cgi-bin/calc.cgi" method="GET">
+            <label for="a">数値 A:</label>
+            <input type="number" id="a" name="a" value="10" required>
+            
+            <label for="b">数値 B:</label>
+            <input type="number" id="b" name="b" value="20" required>
+            
+            <button type="submit">C言語CGIへ送信</button>
+        </form>
+    </div>
+</body>
+</html>
