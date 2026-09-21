@@ -1,0 +1,60 @@
+name: Build and deploy C CGI application
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Build calculation CGI
+        run: gcc -Wall -Wextra -Werror src/calc.c -o calc.cgi
+
+      - name: Build test CGI
+        run: gcc -Wall -Wextra -Werror src/test.c -o test.cgi
+
+      - name: Run test CGI smoke test
+        run: ./test.cgi | grep -q "Hello from C CGI!"
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Configure SSH
+        env:
+          AZURE_VM_SSH_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$AZURE_VM_SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$AZURE_VM_HOST" >> ~/.ssh/known_hosts
+
+      - name: Copy application to Azure VM
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          AZURE_VM_USER: ${{ secrets.AZURE_VM_USER }}
+        run: |
+          ssh "$AZURE_VM_USER@$AZURE_VM_HOST" 'mkdir -p ~/azure_c_calc-app'
+          scp -r public src deploy.sh \
+            "$AZURE_VM_USER@$AZURE_VM_HOST:~/azure_c_calc-app/"
+
+      - name: Deploy on Azure VM
+        env:
+          AZURE_VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          AZURE_VM_USER: ${{ secrets.AZURE_VM_USER }}
+        run: |
+          ssh "$AZURE_VM_USER@$AZURE_VM_HOST" \
+            'cd ~/azure_c_calc-app && chmod +x deploy.sh && ./deploy.sh'
