@@ -23,3 +23,10 @@
 |:----:|:----:|:----:|
 |public/index.html|そのままコピー ➔|/var/www/html/index.html|
 |src/calc.c|gcc でビルド (calc.cgi) ➔|/usr/lib/cgi-bin/calc.cgi|
+
+## デプロイスクリプト
+### 実行権限の付与と使用方法
+```[Bash]
+chmod +x deploy.sh
+./deploy.sh
+```
