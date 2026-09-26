@@ -55,14 +55,14 @@ gcc -Wall -Wextra -Werror src/test.c -o test.cgi
 
 ```mermaid
 flowchart TD
-    Push[mainへpush] --> Checkout[actions/checkout@v5]
-    Checkout --> Build[gccでcalc.c/test.cをビルド]
-    Build --> Smoke[テストCGIのスモークテスト]
-    Smoke --> Deploy{mainへのpushか}
-    Deploy -->|Yes| SSH[SSH設定]
-    SSH --> Copy[SCPでpublic/src/deploy.shを転送]
-    Copy --> Remote[Azure VM上でdeploy.sh実行]
-    Deploy -->|No: pull request| End[終了]
+    Push["mainへpush"] --> Checkout["actions/checkout@v5"]
+    Checkout --> Build["gccでcalc.c, test.cをビルド"]
+    Build --> Smoke["テストCGIのスモークテスト"]
+    Smoke --> Deploy{"mainへのpushか"}
+    Deploy -->|Yes| SSH["SSH設定"]
+    SSH --> Copy["SCPでpublic/src/deploy.shを転送"]
+    Copy --> Remote["Azure VM上でdeploy.sh実行"]
+    Deploy -->|No| End["終了"]
     Remote --> End
 ```
 

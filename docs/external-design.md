@@ -13,11 +13,11 @@
 
 ```mermaid
 flowchart LR
-    User[利用者のブラウザ] -->|GET /| Apache[Apache HTTP Server]
-    Apache -->|静的配信| Index[public/index.html]
-    User -->|GET /cgi-bin/calc.cgi?a=10&b=20| Apache
-    Apache -->|CGI起動| Calc[/usr/lib/cgi-bin/calc.cgi]
-    Calc -->|HTMLレスポンス| Apache
+    User["利用者のブラウザ"] -->|"GET /"| Apache["Apache HTTP Server"]
+    Apache -->|"静的配信"| Index["public/index.html"]
+    User -->|"GET /cgi-bin/calc.cgi (a=10, b=20)"| Apache
+    Apache -->|"CGI起動"| Calc["/usr/lib/cgi-bin/calc.cgi"]
+    Calc -->|"HTMLレスポンス"| Apache
     Apache --> User
 ```
 
