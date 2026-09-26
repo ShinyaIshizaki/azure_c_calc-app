@@ -30,3 +30,11 @@
 chmod +x deploy.sh
 ./deploy.sh
 ```
+
+## ドキュメント
+
+- [外部設計書](docs/external-design.md): 利用者向け機能、画面、システム構成
+- [内部設計書](docs/internal-design.md): ソース構成、処理、ビルド、CI/CD
+- [CGIインターフェース仕様書](docs/api-spec.md): `calc.cgi` の入出力仕様
+- [テスト計画書](docs/test-plan.md): テスト項目と確認コマンド
+- [運用・デプロイ手順書](docs/operations.md): Azure VMとGitHub Actionsの運用手順
