@@ -1,0 +1,41 @@
+name: Deploy to Azure VM
+
+on:
+  push:
+    branches:
+      - main  # main ブランチへの push を検知して自動実行
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリのチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Azure VM へ SSH 接続してビルド & デプロイを実行
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_SSH_KEY }}
+          script: |
+            set -e
+            echo "=== Azure VM 上での自動デプロイ開始 ==="
+            
+            # 1. 開発用リポジトリディレクトリへ移動（無ければクローン）
+            if [ ! -d "~/azure_c_calc-app" ]; then
+              git clone https://github.com/${{ github.repository }}.git ~/azure_c_calc-app
+            fi
+            
+            cd ~/azure_c_calc-app
+            
+            # 2. 最新コードの取得
+            git fetch origin main
+            git reset --hard origin/main
+            
+            # 3. ビルドと配置（deploy.sh の実行）
+            chmod +x deploy_local.sh
+            ./deploy_local.sh
+            
+            echo "=== 自動デプロイ完了 ==="
