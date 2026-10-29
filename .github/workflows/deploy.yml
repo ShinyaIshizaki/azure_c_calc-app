@@ -57,5 +57,5 @@ jobs:
             --resource-group "azure-linux-vm_グループ" \
             --nsg-name "azure-linux-vm-nsg" \
             --name "SSH" \
-            --source-address-prefixes "Any" \
+            --source-address-prefixes "*" \
             --access Deny
