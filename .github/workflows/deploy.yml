@@ -1,9 +1,9 @@
-name: Deploy to Azure VM
+name: Deploy to Azure VM (Secure Dynamic NSG)
 
 on:
   push:
     branches:
-      - main  # main ブランチへの push を検知して自動実行
+      - main
 
 jobs:
   deploy:
@@ -13,7 +13,25 @@ jobs:
       - name: リポジトリのチェックアウト
         uses: actions/checkout@v4
 
-      - name: Azure VM へ SSH 接続してビルド & デプロイを実行
+      - name: Azureへログイン
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: 実行中ランナーのグローバルIPを取得
+        id: ip
+        uses: haythem/public-ip@v1.2
+
+      - name: Azure NSGに一時的アクセス許可を追加
+        run: |
+          az network nsg rule update \
+            --resource-group "azure-linux-vm_グループ" \
+            --nsg-name "azure-linux-vm-nsg" \
+            --name "SSH" \
+            --source-address-prefixes "${{ steps.ip.outputs.ipv4 }}/32" \
+            --access Allow
+
+      - name: Azure VM へ SSH 接続して自動デプロイを実行
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
@@ -22,20 +40,22 @@ jobs:
           script: |
             set -e
             echo "=== Azure VM 上での自動デプロイ開始 ==="
-            
-            # 1. 開発用リポジトリディレクトリへ移動（無ければクローン）
             if [ ! -d "~/azure_c_calc-app" ]; then
               git clone https://github.com/${{ github.repository }}.git ~/azure_c_calc-app
             fi
-            
             cd ~/azure_c_calc-app
-            
-            # 2. 最新コードの取得
             git fetch origin main
             git reset --hard origin/main
-            
-            # 3. ビルドと配置（deploy.sh の実行）
             chmod +x deploy_local.sh
             ./deploy_local.sh
-            
             echo "=== 自動デプロイ完了 ==="
+
+      - name: 【後処理】Azure NSG の一時許可を閉じる (Deny)
+        if: always() # デプロイの成功・失敗にかかわらず確実に実行
+        run: |
+          az network nsg rule update \
+            --resource-group "azure-linux-vm_グループ" \
+            --nsg-name "azure-linux-vm-nsg" \
+            --name "SSH" \
+            --source-address-prefixes "Any" \
+            --access Deny
