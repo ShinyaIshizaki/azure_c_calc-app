@@ -2,58 +2,40 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_BUFFER 1024
-
 int main(void) {
-    // HTTPレスポンスヘッダー
-    printf("Content-Type: text/html; charset=utf-8\r\n\r\n");
+    // 1. HTTPヘッダーの出力（文字コード UTF-8）
+    printf("Content-Type: text/html;charset=UTF-8\n\n");
 
-    char *method = getenv("REQUEST_METHOD");
-    
-    // 【重要】配列として正しく宣言 (サイズ MAX_BUFFER)
-    char raw_data[MAX_BUFFER] = {0};
+    // 2. 環境変数 QUERY_STRING からクエリ文字列を取得
+    char *query = getenv("QUERY_STRING");
+    int a = 0, b = 0;
+    int parsed = 0;
 
-    // リクエストメソッドに応じた処理分岐
-    if (method != NULL && strcmp(method, "GET") == 0) {
-        // GETの場合: 環境変数 QUERY_STRING から取得
-        char *query_string = getenv("QUERY_STRING");
-        if (query_string != NULL) {
-            strncpy(raw_data, query_string, MAX_BUFFER - 1);
-        }
-    } else if (method != NULL && strcmp(method, "POST") == 0) {
-        // POSTの場合: CONTENT_LENGTH を読み取り、標準入力 (stdin) から取得
-        char *content_length_str = getenv("CONTENT_LENGTH");
-        if (content_length_str != NULL) {
-            int content_length = atoi(content_length_str);
-
-            // バッファオーバーフロー防止チェック
-            if (content_length > 0 && content_length < MAX_BUFFER) {
-                // 標準入力 (stdin) から指定バイト数分読み込む
-                fread(raw_data, 1, content_length, stdin);
-                raw_data[content_length] = '\0'; // ナル終端処理
-            }
+    if (query != NULL) {
+        // "a=10&b=20" のような形式を sscanf でパース
+        if (sscanf(query, "a=%d&b=%d", &a, &b) == 2) {
+            parsed = 1;
         }
     }
 
-    // HTML出力
+    // 3. 動的な HTML レスポンスの生成
     printf("<!DOCTYPE html>\n");
     printf("<html lang=\"ja\">\n");
     printf("<head>\n");
     printf("  <meta charset=\"UTF-8\">\n");
-    printf("  <title>CGI GET/POST Test</title>\n");
-    printf("  <style>\n");
-    printf("    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }\n");
-    printf("    .result { background: #eef6ff; padding: 15px; border-radius: 6px; border-left: 4px solid #0066cc; }\n");
-    printf("    code { background: #e0e0e0; padding: 2px 6px; border-radius: 4px; }\n");
-    printf("  </style>\n");
+    printf("  <title>CGI Calculator</title>\n");
     printf("</head>\n");
     printf("<body>\n");
-    printf("  <h1>C言語CGI: データ受信結果</h1>\n");
-    printf("  <div class=\"result\">\n");
-    printf("    <p><strong>リクエストメソッド:</strong> <code>%s</code></p>\n", method ? method : "UNKNOWN");
-    printf("    <p><strong>受信した生データ:</strong> <code>%s</code></p>\n", raw_data[0] != '\0' ? raw_data : "(空)");
-    printf("  </div>\n");
-    printf("  <p><a href=\"/\">← フォーム画面に戻る</a></p>\n");
+    printf("  <h1>CGI 計算アプリ (Task 4)</h1>\n");
+
+    if (parsed) {
+        int sum = a + b;
+        printf("  <p>計算結果: %d + %d = <strong>%d</strong></p>\n", a, b, sum);
+    } else {
+        printf("  <p style=\"color: red;\">エラー: パラメータが正しく指定されていません。</p>\n");
+        printf("  <p>利用例: <a href=\"calc.cgi?a=10&b=20\">calc.cgi?a=10&b=20</a></p>\n");
+    }
+
     printf("</body>\n");
     printf("</html>\n");
 
