@@ -40,8 +40,15 @@ jobs:
           script: |
             set -e
             echo "=== Azure VM 上での自動デプロイ開始 ==="
-            if [ ! -d "~/azure_c_calc-app" ]; then
+            # 存在する場合はクローンせず、既存リポジトリを更新する
+            if [ -d "~/azure_c_calc-app/.git" ]; then
+              cd ~/azure_c_calc-app
+              git fetch origin main
+              git reset --hard origin/main
+            else
+              rm -rf ~/azure_c_calc-app
               git clone https://github.com/${{ github.repository }}.git ~/azure_c_calc-app
+              cd ~/azure_c_calc-app
             fi
             cd ~/azure_c_calc-app
             git fetch origin main
